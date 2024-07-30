@@ -18,12 +18,39 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.flywaydb:flyway-core'
+
+	runtimeOnly 'org.postgresql:postgresql'
+//	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:postgresql'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.named('bootBuildImage') {
+	imageName = "book-service"
+
+	if (System.getProperty("os.arch").toLowerCase().startsWith('aarch')) {
+		// This builder is only for ARM64 systems.
+		// For more info: https://github.com/dashaun/paketo-arm64
+		builder = "docker.io/dashaun/builder-arm:tiny"
+	} else {
+		// This builder is for x86_64 systems.
+		builder = "paketobuildpacks/builder:base"
+	}
+
+	// Set to "true" if you want to build a native image with GraalVM.
+	environment = ["BP_NATIVE_IMAGE": "false"]
 }
